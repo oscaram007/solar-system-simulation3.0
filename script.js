@@ -92,52 +92,164 @@ function animate() {
   ctx.fillStyle = sunGradient;
   ctx.fill();
 
-  // Draw planets
-  planets.forEach(planet => {
-    planet.angle += planet.speed;
-    const x = centerX + planet.distance * Math.cos(planet.angle);
-    const y = centerY + planet.distance * Math.sin(planet.angle);
+// Draw planets with enhanced details
+planets.forEach(planet => {
+  planet.angle += planet.speed;
+  const x = centerX + planet.distance * Math.cos(planet.angle);
+  const y = centerY + planet.distance * Math.sin(planet.angle);
 
-    const gradient = ctx.createRadialGradient(
-      x - planet.radius / 3, y - planet.radius / 3, planet.radius / 5,
-      x, y, planet.radius
+  // Base radial gradient for planet shading
+  const gradient = ctx.createRadialGradient(
+    x - planet.radius / 3, y - planet.radius / 3, planet.radius / 5,
+    x, y, planet.radius
+  );
+
+  switch (planet.name) {
+    case 'Mercury':
+      gradient.addColorStop(0, '#e0e0e0');
+      gradient.addColorStop(0.7, '#b2b2b2');
+      gradient.addColorStop(1, '#7a7a7a');
+      break;
+
+    case 'Venus':
+      gradient.addColorStop(0, '#fff5e6');
+      gradient.addColorStop(0.5, '#f5d6a1');
+      gradient.addColorStop(1, '#d4b58c');
+      break;
+
+    case 'Earth':
+      gradient.addColorStop(0, '#6ec1ff');   // oceans
+      gradient.addColorStop(0.7, '#2e86c1');
+      gradient.addColorStop(0.85, '#1c5a99');
+      gradient.addColorStop(1, '#133f73');
+
+      // Add cloud overlay using white semi-transparent arcs
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        const cloudRadius = planet.radius * (0.1 + Math.random() * 0.4);
+        const angle = Math.random() * Math.PI * 2;
+        ctx.arc(
+          x + Math.cos(angle) * planet.radius * 0.3,
+          y + Math.sin(angle) * planet.radius * 0.3,
+          cloudRadius,
+          0,
+          Math.PI * 2
+        );
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.fill();
+      }
+      break;
+
+    case 'Mars':
+      gradient.addColorStop(0, '#ff7f50');
+      gradient.addColorStop(0.5, '#e0522c');
+      gradient.addColorStop(1, '#b03d1d');
+
+      // Add surface streaks
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(
+          x - planet.radius + Math.random() * planet.radius * 2,
+          y - planet.radius + Math.random() * planet.radius * 2
+        );
+        ctx.lineTo(
+          x - planet.radius + Math.random() * planet.radius * 2,
+          y - planet.radius + Math.random() * planet.radius * 2
+        );
+        ctx.strokeStyle = 'rgba(200, 50, 30, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      break;
+
+    case 'Jupiter':
+      gradient.addColorStop(0, '#ffe0b2');
+      gradient.addColorStop(0.5, '#d9b48f');
+      gradient.addColorStop(1, '#b07250');
+
+      // Add stripes
+      for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        ctx.arc(x, y, planet.radius - i * 2, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(180,130,90,${0.15})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+      break;
+
+    case 'Saturn':
+      gradient.addColorStop(0, '#fff8c4');
+      gradient.addColorStop(0.7, '#f4e1a0');
+      gradient.addColorStop(1, '#d4c08c');
+
+      // Draw ring
+      ctx.beginPath();
+      ctx.ellipse(x, y, planet.radius * 1.6, planet.radius * 0.5, Math.PI / 4, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(200, 180, 120, 0.6)';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      break;
+
+    case 'Uranus':
+      gradient.addColorStop(0, '#b0f0ff');
+      gradient.addColorStop(1, '#4da3cc');
+
+      // Subtle horizontal lines
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x - planet.radius, y - planet.radius + i * 4);
+        ctx.lineTo(x + planet.radius, y - planet.radius + i * 4);
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      break;
+
+    case 'Neptune':
+      gradient.addColorStop(0, '#66a3ff');
+      gradient.addColorStop(1, '#1c3fa0');
+
+      // Subtle swirls
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.arc(
+          x + (Math.random() - 0.5) * planet.radius * 0.6,
+          y + (Math.random() - 0.5) * planet.radius * 0.6,
+          planet.radius * 0.1,
+          0,
+          Math.PI * 2
+        );
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fill();
+      }
+      break;
+  }
+
+  // Draw planet
+  ctx.beginPath();
+  ctx.arc(x, y, planet.radius, 0, Math.PI * 2);
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  // Draw moons
+  if (planet.moon) {
+    planet.moon.angle += planet.moon.speed;
+    const mx = x + planet.moon.distance * Math.cos(planet.moon.angle);
+    const my = y + planet.moon.distance * Math.sin(planet.moon.angle);
+
+    const moonGradient = ctx.createRadialGradient(
+      mx - planet.moon.radius / 3, my - planet.moon.radius / 3,
+      planet.moon.radius / 4, mx, my, planet.moon.radius
     );
-
-    switch (planet.name) {
-      case 'Mercury': gradient.addColorStop(0, '#d0d0d0'); gradient.addColorStop(1, '#7a7a7a'); break;
-      case 'Venus': gradient.addColorStop(0, '#fff5e6'); gradient.addColorStop(1, '#f5d6a1'); break;
-      case 'Earth': gradient.addColorStop(0, '#6ec1ff'); gradient.addColorStop(0.7, '#2e86c1'); gradient.addColorStop(1, '#1c5a99'); break;
-      case 'Mars': gradient.addColorStop(0, '#ff6f4c'); gradient.addColorStop(1, '#b03d1d'); break;
-      case 'Jupiter': gradient.addColorStop(0, '#ffe0b2'); gradient.addColorStop(0.5, '#d9b48f'); gradient.addColorStop(1, '#b07250'); break;
-      case 'Saturn': gradient.addColorStop(0, '#fff8c4'); gradient.addColorStop(0.7, '#f4e1a0'); gradient.addColorStop(1, '#d4c08c'); break;
-      case 'Uranus': gradient.addColorStop(0, '#b0f0ff'); gradient.addColorStop(1, '#4da3cc'); break;
-      case 'Neptune': gradient.addColorStop(0, '#66a3ff'); gradient.addColorStop(1, '#1c3fa0'); break;
-    }
+    moonGradient.addColorStop(0, '#dddddd');
+    moonGradient.addColorStop(1, '#888888');
 
     ctx.beginPath();
-    ctx.arc(x, y, planet.radius, 0, Math.PI * 2);
-    ctx.fillStyle = gradient;
+    ctx.arc(mx, my, planet.moon.radius, 0, Math.PI * 2);
+    ctx.fillStyle = moonGradient;
     ctx.fill();
-
-    // Draw moons
-    if (planet.moon) {
-      planet.moon.angle += planet.moon.speed;
-      const mx = x + planet.moon.distance * Math.cos(planet.moon.angle);
-      const my = y + planet.moon.distance * Math.sin(planet.moon.angle);
-
-      const moonGradient = ctx.createRadialGradient(
-        mx - planet.moon.radius / 3, my - planet.moon.radius / 3,
-        planet.moon.radius / 4, mx, my, planet.moon.radius
-      );
-      moonGradient.addColorStop(0, '#dddddd');
-      moonGradient.addColorStop(1, '#888888');
-
-      ctx.beginPath();
-      ctx.arc(mx, my, planet.moon.radius, 0, Math.PI * 2);
-      ctx.fillStyle = moonGradient;
-      ctx.fill();
-    }
-  });
+  }
+});
 
   // Draw asteroids
   asteroids.forEach(asteroid => {
