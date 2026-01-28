@@ -231,8 +231,15 @@ function animate() {
 
 // Resize handling
 function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  const dpr = window.devicePixelRatio || 1;
+
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
   initialize();
 }
 
