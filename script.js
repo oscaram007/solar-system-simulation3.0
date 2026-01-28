@@ -2,10 +2,8 @@
 const canvas = document.getElementById('solarSystem');
 const ctx = canvas.getContext('2d');
 
-let centerX = canvas.width / 2;
-let centerY = canvas.height / 2;
+let centerX, centerY;
 
-// Solar system data embedded directly
 const solarData = {
   sun: { radius: 50, color: 'yellow' },
   planets: [
@@ -72,28 +70,25 @@ function drawStars() {
 
 // Main animation loop
 function animate() {
-  // Fill background with black first
+  // Fill background fully black
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Draw stars on top of the black background
   drawStars();
 
-  // Draw Sun
+  // Draw Sun with gradient
+  const sunGradient = ctx.createRadialGradient(
+    centerX, centerY, sun.radius * 0.2,
+    centerX, centerY, sun.radius
+  );
+  sunGradient.addColorStop(0, '#fff9a3');
+  sunGradient.addColorStop(0.3, '#fff176');
+  sunGradient.addColorStop(0.6, '#ffd54f');
+  sunGradient.addColorStop(0.8, '#ffb300');
+  sunGradient.addColorStop(1, '#ffa000');
+
   ctx.beginPath();
   ctx.arc(centerX, centerY, sun.radius, 0, Math.PI * 2);
-
-  // Create radial gradient for texture
-  const sunGradient = ctx.createRadialGradient(
-    centerX, centerY, sun.radius * 0.2,  // inner bright core
-    centerX, centerY, sun.radius         // outer edge
-  );
-  sunGradient.addColorStop(0, '#fff9a3');  // very bright center
-  sunGradient.addColorStop(0.3, '#fff176'); // strong yellow
-  sunGradient.addColorStop(0.6, '#ffd54f'); // mid-tone
-  sunGradient.addColorStop(0.8, '#ffb300'); // darker outer layer
-  sunGradient.addColorStop(1, '#ffa000');   // soft orange edge
-
   ctx.fillStyle = sunGradient;
   ctx.fill();
 
@@ -108,43 +103,15 @@ function animate() {
       x, y, planet.radius
     );
 
-    // Add subtle color variations based on planet
     switch (planet.name) {
-      case 'Mercury':
-        gradient.addColorStop(0, '#d0d0d0'); // bright highlight
-        gradient.addColorStop(1, '#7a7a7a'); // core color
-        break;
-      case 'Venus':
-        gradient.addColorStop(0, '#fff5e6');
-        gradient.addColorStop(1, '#f5d6a1');
-        break;
-      case 'Earth':
-        gradient.addColorStop(0, '#6ec1ff'); // oceans
-        gradient.addColorStop(0.7, '#2e86c1'); // deeper water
-        gradient.addColorStop(1, '#1c5a99'); // edges/shadow
-        break;
-      case 'Mars':
-        gradient.addColorStop(0, '#ff6f4c');
-        gradient.addColorStop(1, '#b03d1d');
-        break;
-      case 'Jupiter':
-        gradient.addColorStop(0, '#ffe0b2');
-        gradient.addColorStop(0.5, '#d9b48f');
-        gradient.addColorStop(1, '#b07250');
-        break;
-      case 'Saturn':
-        gradient.addColorStop(0, '#fff8c4');
-        gradient.addColorStop(0.7, '#f4e1a0');
-        gradient.addColorStop(1, '#d4c08c');
-        break;
-      case 'Uranus':
-        gradient.addColorStop(0, '#b0f0ff');
-        gradient.addColorStop(1, '#4da3cc');
-        break;
-      case 'Neptune':
-        gradient.addColorStop(0, '#66a3ff');
-        gradient.addColorStop(1, '#1c3fa0');
-        break;
+      case 'Mercury': gradient.addColorStop(0, '#d0d0d0'); gradient.addColorStop(1, '#7a7a7a'); break;
+      case 'Venus': gradient.addColorStop(0, '#fff5e6'); gradient.addColorStop(1, '#f5d6a1'); break;
+      case 'Earth': gradient.addColorStop(0, '#6ec1ff'); gradient.addColorStop(0.7, '#2e86c1'); gradient.addColorStop(1, '#1c5a99'); break;
+      case 'Mars': gradient.addColorStop(0, '#ff6f4c'); gradient.addColorStop(1, '#b03d1d'); break;
+      case 'Jupiter': gradient.addColorStop(0, '#ffe0b2'); gradient.addColorStop(0.5, '#d9b48f'); gradient.addColorStop(1, '#b07250'); break;
+      case 'Saturn': gradient.addColorStop(0, '#fff8c4'); gradient.addColorStop(0.7, '#f4e1a0'); gradient.addColorStop(1, '#d4c08c'); break;
+      case 'Uranus': gradient.addColorStop(0, '#b0f0ff'); gradient.addColorStop(1, '#4da3cc'); break;
+      case 'Neptune': gradient.addColorStop(0, '#66a3ff'); gradient.addColorStop(1, '#1c3fa0'); break;
     }
 
     ctx.beginPath();
@@ -152,7 +119,7 @@ function animate() {
     ctx.fillStyle = gradient;
     ctx.fill();
 
-    // Draw moon if exists
+    // Draw moons
     if (planet.moon) {
       planet.moon.angle += planet.moon.speed;
       const mx = x + planet.moon.distance * Math.cos(planet.moon.angle);
@@ -172,7 +139,7 @@ function animate() {
     }
   });
 
-  // Draw asteroids (asteroid belt)
+  // Draw asteroids
   asteroids.forEach(asteroid => {
     asteroid.angle += asteroid.speed;
     const ax = centerX + asteroid.distance * Math.cos(asteroid.angle);
@@ -180,14 +147,14 @@ function animate() {
 
     ctx.beginPath();
     ctx.arc(ax, ay, asteroid.radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#aaaaaa'; // gray color for asteroids
+    ctx.fillStyle = '#aaaaaa';
     ctx.fill();
   });
 
   requestAnimationFrame(animate);
 }
 
-// Handle window resize
+// Resize canvas and reinitialize stars/planets/asteroids
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -196,6 +163,6 @@ function resizeCanvas() {
 
 window.addEventListener('resize', resizeCanvas);
 
-// Start everything
+// Initial setup
 resizeCanvas();
 animate();
